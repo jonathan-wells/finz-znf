@@ -93,7 +93,21 @@ hmmsearch --tblout tmp.out \
     tmp.fa
 awk '{ print $1 }' tmp.out | sort | uniq > finz.names
 seqtk subseq tmp.fa finz.names > ../data/seqs/cypriniformes_augustus_finz.fa
-rm tmp.fa tmp.out finz.names
 
 
+# Remove alternate loci
+rg -f ../data/misc/Danio_rerio_alt_contigs.txt ../data/gffs/Danio_rerio_augustus_finz.gff |
+    rg transcript | 
+    awk '{ print $NF }' | 
+    sed 's/^ID=/Danio_rerio_/g' |
+    sed 's/;Parent=.*//g' > tmp.out
+rg '>' ../data/seqs/cypriniformes_augustus_finz.fa |
+    cut -c 2- |
+    rg -v -f tmp.out > finz.names
+seqtk subseq ../data/seqs/cypriniformes_augustus_finz.fa finz.names > tmp.fa
+mv tmp.fa ../data/seqs/cypriniformes_augustus_finz.fa
+seqtk subseq ../data/seqs/cypriniformes_augustus_finz.codingseq.fa finz.names > tmp.fa
+mv tmp.fa ../data/seqs/cypriniformes_augustus_finz.codingseq.fa
+
+rm tmp.out finz.names
 
