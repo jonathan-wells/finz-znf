@@ -3,6 +3,8 @@
 from collections import defaultdict
 import re
 import sys
+from Bio import SeqIO
+import argparse
 
 def load_clusters(filename):
     clusters = defaultdict(list)
@@ -34,13 +36,51 @@ def parse_clusters(clusters):
             cluster_types['mixed'].append(key)
     return cluster_types
 
+def get_seqs(clusters, cid, codons=False):
+    if codons:
+        seqs = SeqIO.to_dict(SeqIO.parse('../../data/seqs/cypriniformes_augustus_finz.dna.fa', 'fasta'))
+    else:
+        seqs = SeqIO.to_dict(SeqIO.parse('../../data/seqs/cypriniformes_augustus_finz.fa', 'fasta'))
+    for i in clusters[str(cid)]:
+        SeqIO.write(seqs[i], sys.stdout, 'fasta')
+    
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-f', '--filename', help='cd-hit output file', type=str)
+    parser.set_defaults(filename='../../data/cdhit_clusters.clstr')
+    subparsers = parser.add_subparsers(title='subcommands',
+                                       description='valid subcommands',
+                                       dest='command',
+                                       help='additional help')
+    
+    parse = subparsers.add_parser('parse')
+    parse.add_argument('-t', '--type',
+            required=True,
+            type=str,
+            help='Cluster type: choose from "orthologs", "paralogs", "mixed"')
+    parse.set_defaults(func=parse_clusters)
+    
+    getseqs = subparsers.add_parser('getseqs')
+    getseqs.add_argument('-c', '--codons', type=bool)
+    getseqs.add_argument('-i', '--id', type=str)
+    getseqs.set_defaults(func=get_seqs)
+    
+    args = parser.parse_args()
+    clusters = load_clusters(args.filename)
+    if args.command == 'parse':
+        parsed_clusters = args.func(clusters)
+        for key in parsed_clusters[args.type][::-1]:
+            print(key)
+            for seqid in clusters[key]:
+                print(f'\t{seqid}')
+    elif args.command == 'getseqs':
+        if args.codons:
+            args.func(clusters, args.id, args.codons)
+        else:
+            args.func(clusters, args.id)
+        
+
 
 if __name__ == '__main__':
-    c = load_clusters(sys.argv[1])
-    ct = parse_clusters(c)
-    for key in ct[sys.argv[2]][::-1]:
-        print(key)
-        for seqid in c[key]:
-            print(f'\t{seqid}')
-
-
+    main()

@@ -149,41 +149,41 @@ done < ../../data/species_genomes.txt
 ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ## 5. HMMER to extract only predicted FINZ-ZNFs
 ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#cat ../../data/seqs/*_augustus_finz.aa.fa > tmp.fa 
-#cat ../../data/seqs/*_augustus_finz.codingseq.fa > tmp2.fa 
+cat ../../data/seqs/*_augustus_finz.aa.fa > tmp.fa 
+cat ../../data/seqs/*_augustus_finz.codingseq.fa > tmp2.fa 
 
-#hmmsearch --tblout tmp.out \
-#    -E 1e-04 \
-#    ../../data/phmms/finz_seed.hmm \
-#    tmp.fa
-#rg -v '^#' tmp.out | awk '{ print $1 }' | sort | uniq > finz.names
+hmmsearch --tblout tmp.out \
+    -E 1e-04 \
+    ../../data/phmms/finz_seed.hmm \
+    tmp.fa
+rg -v '^#' tmp.out | awk '{ print $1 }' | sort | uniq > finz.names
 
-#hmmsearch --tblout tmp.out \
-#    -E 1e-04 \
-#    ../../data/phmms/PF00096_seed.hmm \
-#    tmp.fa
+hmmsearch --tblout tmp.out \
+    -E 1e-04 \
+    ../../data/phmms/PF00096_seed.hmm \
+    tmp.fa
 
-#rg -v '^#' tmp.out | awk '{ print $1 }' | sort | uniq > c2h2.names
+rg -v '^#' tmp.out | awk '{ print $1 }' | sort | uniq > c2h2.names
 
-#cat finz.names c2h2.names | sort | uniq -d > finz_znf.names
-#seqtk subseq tmp.fa finz_znf.names > ../../data/seqs/cypriniformes_augustus_finz.fa
-#seqtk subseq tmp2.fa finz_znf.names >../../data/seqs/cypriniformes_augustus_finz.codingseq.fa
+cat finz.names c2h2.names | sort | uniq -d > finz_znf.names
+seqtk subseq tmp.fa finz_znf.names > ../../data/seqs/cypriniformes_augustus_finz.fa
+seqtk subseq tmp2.fa finz_znf.names >../../data/seqs/cypriniformes_augustus_finz.dna.fa
 
 # Use blastp to extract only homologues of marker genes and discard flanking
 # genes captured by augustus.
-for prot in FICD GLYT ILF2 RAG1 RAG2 TBR1; do
-    cat ../../data/seqs/*_augustus_$prot.aa.fa \
-        > "../../data/species-phylogeny/multispecies_${prot}.fa"
-    blastp \
-        -query "../../data/phmms/${prot}.consensus.fa" \
-        -subject "../../data/species-phylogeny/multispecies_${prot}.fa" \
-        -outfmt 6 \
-        -evalue 1e-10 | awk '{ print $2 }' > "${prot}.names"
-    seqtk subseq \
-        "../../data/species-phylogeny/multispecies_${prot}.fa" \
-        "${prot}.names" > tmp.fa
-    mv tmp.fa "../../data/species-phylogeny/multispecies_${prot}.fa"
-done
+# for prot in FICD GLYT ILF2 RAG1 RAG2 TBR1; do
+#     cat ../../data/seqs/*_augustus_$prot.aa.fa \
+#         > "../../data/species-phylogeny/multispecies_${prot}.fa"
+#     blastp \
+#         -query "../../data/phmms/${prot}.consensus.fa" \
+#         -subject "../../data/species-phylogeny/multispecies_${prot}.fa" \
+#         -outfmt 6 \
+#         -evalue 1e-10 | awk '{ print $2 }' > "${prot}.names"
+#     seqtk subseq \
+#         "../../data/species-phylogeny/multispecies_${prot}.fa" \
+#         "${prot}.names" > tmp.fa
+#     mv tmp.fa "../../data/species-phylogeny/multispecies_${prot}.fa"
+# done
 
-rm tmp.out *.names
+rm tmp*.fa tmp.out *.names
 
