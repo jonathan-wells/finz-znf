@@ -13,7 +13,8 @@ prepareAlign \
 
 # For genes used to generate species phylogeny
 # These alignments were downloaded from EggNog on 
-for prot in FICD GLYT ILF2 MYH6 RAG1 RAG2 TBR1; do
+orthologues=(FICD GLYT ILF2 RAG1 RAG2 TBR1 FSHR KLHL35 RWDD3 CDAN1 TPO WFIKKN1 DCST2)
+for prot in ${orthologues[@]}; do
     echo "Generating $prot profiles"
     
     hmmbuild "../../data/phmms/${prot}.hmm" "../../data/phmms/${prot}.fa"
