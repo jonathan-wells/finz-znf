@@ -71,7 +71,7 @@ def main():
     alignments = []
     dirname = '../../data/species-phylogeny'
     for filename in os.listdir(dirname):
-        if filename.endswith('ginsi.fa'):
+        if filename.endswith('trimmed.fa'):
             prot = filename.split('.')[0].split('_')[1]
             alignments.append(load_orthos(f'{dirname}/{filename}'))
     concat, meta = concatenate_alignments(species, alignments)

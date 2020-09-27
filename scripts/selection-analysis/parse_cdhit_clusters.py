@@ -47,7 +47,6 @@ def get_seqs(clusters, cid, codons=False):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('-f', '--filename', help='cd-hit output file', type=str)
     parser.set_defaults(filename='../../data/cdhit_clusters.clstr')
     subparsers = parser.add_subparsers(title='subcommands',
                                        description='valid subcommands',
@@ -55,6 +54,7 @@ def main():
                                        help='additional help')
     
     parse = subparsers.add_parser('parse')
+    parse.add_argument('-f', '--filename', help='cd-hit output file', type=str)
     parse.add_argument('-t', '--type',
             required=True,
             type=str,
@@ -62,6 +62,7 @@ def main():
     parse.set_defaults(func=parse_clusters)
     
     getseqs = subparsers.add_parser('getseqs')
+    getseqs.add_argument('-f', '--filename', help='cd-hit output file', type=str)
     getseqs.add_argument('-c', '--codons', type=bool)
     getseqs.add_argument('-i', '--id', type=str)
     getseqs.set_defaults(func=get_seqs)
