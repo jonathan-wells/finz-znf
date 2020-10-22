@@ -16,7 +16,7 @@ def footprint(seq):
 
 def extract_footprints(min_znfs=3):
     footprints = {}
-    for record in SeqIO.parse('../data/seqs/cypriniformes_augustus_finz.fa',
+    for record in SeqIO.parse('../../data/seqs/cypriniformes_augustus_finz.fa',
                               'fasta'):
         fp = footprint(str(record.seq))
         if len(fp) >= min_znfs:
