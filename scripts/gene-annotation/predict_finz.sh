@@ -74,7 +74,7 @@ for species in ${!genomes[@]}; do
          --species=zebrafish \
           "../../data/seqs/${species}_finz_blocks.fa" > "../../data/gffs/${species}_augustus_finz.gff"
 
-      Extract all protein sequences
+      # Extract all protein sequences
       /usr/local/Cellar/augustus/3.3.3_1/scripts/getAnnoFasta.pl \
           "../../data/gffs/${species}_augustus_finz.gff" \
           --seqfile="../../data/seqs/${species}_finz_blocks.fa"
