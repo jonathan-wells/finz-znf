@@ -40,6 +40,7 @@ rg -v '^#' tmp.out | awk '{ print $1 }' | sort | uniq > c2h2.names
 
 cat finz.names c2h2.names | sort | uniq -d > ensembl_finz_znf.names
 ./extract_gene_names.py Ensembl > ../../data/gffs/ensembl_finz_znf.gff
+./rename_ensembl_chroms.py  ../../data/gffs/ensembl_finz_znf.gff ../../data/gffs/ensembl_finz_znf.gff
 
 rg '>' ../../data/seqs/danio_rerio_hiqual_finz.fa | cut -c 2- | sed 's/\.t1//g' > denovo_finz_znf.names
 ./extract_gene_names.py denovo > ../../data/gffs/denovo_finz_znf.gff
@@ -56,7 +57,44 @@ rg "\ttranscript\t" ../../data/gffs/denovo_finz_znf.gff \
     | gff2bed > ../../data/beds/denovo_finz_znf.transcripts.bed
 
 bedtools intersect \
-    -a ../../data/beds/refseq_finz_znf.transcripts.bed \
-    -b ../../data/beds/denovo_finz_znf.transcripts.bed \
+    -a ../../data/beds/ensembl_finz_znf.transcripts.bed \
+    -b ../../data/beds/refseq_finz_znf.transcripts.bed \
+    -wa \
+    -wb \
+    -s \
+    -f 0.8 \
+    -r \
     > ensembl_refseq.bed
 
+bedtools intersect \
+    -a ../../data/beds/denovo_finz_znf.transcripts.bed \
+    -b ../../data/beds/refseq_finz_znf.transcripts.bed \
+    -wa \
+    -wb \
+    -s \
+    -f 0.8 \
+    -r \
+    > denovo_refseq.bed
+
+bedtools intersect \
+    -a ../../data/beds/denovo_finz_znf.transcripts.bed \
+    -b ../../data/beds/ensembl_finz_znf.transcripts.bed \
+    -wa \
+    -wb \
+    -s \
+    -f 0.8 \
+    -r \
+    > denovo_ensembl.bed
+
+bedtools intersect \
+    -a ../../data/beds/denovo_finz_znf.transcripts.bed \
+    -b ensembl_refseq.bed \
+    -wa \
+    -wb \
+    -s \
+    -f 0.8 \
+    -r \
+    > denovo_ensembl_refseq.bed
+
+./count_genes.py > ../../data/finz_znf_overlap_80.txt
+rm *.bed
