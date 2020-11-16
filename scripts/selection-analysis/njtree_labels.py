@@ -19,8 +19,9 @@ def shorten(filename, outfilename):
     data = []
     for record in SeqIO.parse(filename, 'fasta'):
         record.id = relabel(record.id)
+        record.description = ''
         data.append(record)
-    SeqIO.write(outfilename, data, 'fasta')
+    SeqIO.write(data, outfilename, 'fasta')
 
 def revert_to_long():
     labeldict = {}
