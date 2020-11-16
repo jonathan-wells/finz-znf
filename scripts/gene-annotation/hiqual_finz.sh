@@ -1,20 +1,22 @@
 #!/usr/bin/env bash
 
 blat \
-    -minIdentity=99 \
+    -minIdentity=97 \
     ../../data/seqs/Danio_rerio_finz_blocks.fa \
     ../../data/expression/expressed.cds.fa \
     expressed.cds.psl
-pslCDnaFilter -maxAligns=1 expressed.cds.psl expressed.cds.f.psl
+pslCDnaFilter -maxAligns=3 expressed.cds.psl expressed.cds.f.psl
 /usr/local/Cellar/augustus/3.3.3_1/scripts/blat2hints.pl --in=expressed.cds.f.psl --out=hints.E.gff
 
 augustus \
+    --species=zebrafish \
     --genemodel=complete \
+    --strand=both \
     --optCfgFile=/usr/local/Cellar/augustus/3.3.3_1/config/ppx.cfg \
     --extrinsicCfgFile=/usr/local/Cellar/augustus/3.3.3_1/config/extrinsic/extrinsic.MPE.cfg \
     --proteinprofile=../../data/phmms/drerio_finz_expressed.prfl \
     --hintsfile=../../data/expression/hints.E.gff \
-    --species=zebrafish \
+    --stopCodonExcludedFromCDS=false \
     --codingseq=on \
     --protein=on \
     --outfile=danio_rerio_hiqual_augustus_finz.gff \
@@ -38,4 +40,4 @@ hmmsearch --tblout tmp.out \
 rg -v '^#' tmp.out | awk '{ print $1 }' | sort | uniq > c2h2.names
 
 cat finz.names c2h2.names | sort | uniq -d > finz_znf.names
-seqtk subseq danio_rerio_hiqual_augustus_finz.aa finz_znf.names > danio_rerio_finz.fa
+seqtk subseq danio_rerio_hiqual_augustus_finz.aa finz_znf.names > ../../data/seqs/danio_rerio_hiqual_finz.fa

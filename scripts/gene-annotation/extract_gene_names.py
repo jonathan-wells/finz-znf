@@ -54,7 +54,7 @@ def extract_ensembl_gff(proteinfile):
             if line == '###\n':
                 ingene = False
                 continue
-            if re.match('\w+\t\w+\tgene\t', line):
+            if re.search('\t\w+\tgene\t', line):
                 gene = re.search('ID=gene:(ENSDARG\d+);', line).group(1)
                 if gene in genes:
                     print(line.strip())
