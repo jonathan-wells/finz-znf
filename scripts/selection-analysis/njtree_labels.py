@@ -7,12 +7,13 @@
 
 from Bio import SeqIO
 import sys
+import re
 
 def relabel(label):
     parts = label.split('.')[0].split('_')
     gcode = parts[0][0]
     scode = ''.join(parts[1][:3])
-    gene = parts[2]
+    gene = parts[2].lstrip('g')
     return f'{gcode}{scode}_{gene}'
 
 def shorten(filename, outfilename):
@@ -23,19 +24,20 @@ def shorten(filename, outfilename):
         data.append(record)
     SeqIO.write(data, outfilename, 'fasta')
 
-def revert_to_long():
+def revert_to_long(newickfile, outnewickfile):
     labeldict = {}
     for record in SeqIO.parse('../../data/seqs/cypriniformes_augustus_finz.fa', 'fasta'):
         njtree_label = relabel(record.id) + ':'
         newlabel = f'{record.id}_[len={len(record.seq)}]:'
         labeldict[njtree_label] = newlabel
 
-    with open('../../data/selection-analysis/needle_nj_incgaps_relabeled.nwk', 'w') as outfile:
-        with open('../../data/selection-analysis/needle_nj_incgaps.nwk') as infile:
+    with open(outnewickfile, 'w') as outfile:
+        with open(newickfile) as infile:
             newtree = infile.read().replace('\n', '')
             for key, val in labeldict.items():
-                newtree = newtree.replace(key, val)
+                newtree = re.sub(key, val, newtree)
             outfile.write(newtree)
 
 if __name__ == '__main__':
     shorten(sys.argv[1], sys.argv[2])
+    # revert_to_long(sys.argv[1], sys.argv[2])
