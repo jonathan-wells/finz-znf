@@ -39,5 +39,5 @@ def revert_to_long(newickfile, outnewickfile):
             outfile.write(newtree)
 
 if __name__ == '__main__':
-    shorten(sys.argv[1], sys.argv[2])
-    # revert_to_long(sys.argv[1], sys.argv[2])
+    # shorten(sys.argv[1], sys.argv[2])
+    revert_to_long(sys.argv[1], sys.argv[2])
