@@ -50,13 +50,17 @@ def main():
                 seqname = accdict[line[0]]
                 source = 'RepeatMasker'
                 feature = 'exon'
-                start = line[1]
-                end = line[2]
+                start = int(line[1]) + 1  # GFF/GTF uses 1-based indexing
+                end = int(line[2]) + 1 
                 score = line[4]
                 strand = line[5]
                 frame = '.'
                 transcript_id, gene_id, family_id, class_id = parse_attrs(line, dupdict)
+
                 if class_id in ['Low_complexity', 'Retroposon', 'Simple_repeat', 'rRNA', 'scRNA', 'snRNA', 'tRNA']:
+                    continue
+                elif gene_id in ['SAT-7_DR', 'BEL-64_DRe-I']:
+                    # These are not TEs but FINZ-ZNFs, ironically.
                     continue
                 attrs = format_attrs(transcript_id, gene_id, family_id, class_id)
                 newline = f'{seqname}\t{source}\t{feature}\t{start}\t{end}\t{score}\t{strand}\t{frame}\t{attrs}\n'
