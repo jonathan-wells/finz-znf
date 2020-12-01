@@ -16,7 +16,11 @@ mv tmp ../../data/gffs/Danio_rerio.GRCz11.101.curated_finz.gtf
 sed 's/transcript://g' ../../data/gffs/danRer11.nonalt.tetranscripts.gtf | sed 's/gene://g' > tmp
 mv tmp ../../data/gffs/danRer11.nonalt.tetranscripts.gtf
 sed 's/transcript://g' ../../data/expression/danRer11.nonalt.genes_tes.gtf | sed 's/gene://g' > tmp
-mv tmp ../../data/expression/danRer11.nonalt.genes_tes.gtf
+mv tmp ../../data/gffs/danRer11.nonalt.genes_tes.gtf
+
+ln -s ../../data/gffs/Danio_rerio.GRCz11.101.curated_finz.gtf ../../data/expression
+ln -s ../../data/gffs/danRer11.nonalt.tetranscripts.gtf ../../data/expression
+ln -s ../../data/gffs/danRer11.nonalt.genes_tes.gtf ../../data/expression
 
 rm subtracted* ../../data/gffs/Danio_rerio_finz.final.gtf
 
