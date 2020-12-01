@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 
-# # Generate genome indices
-# /programs/STAR-2.7.5a/bin/Linux_x86_64/STAR \
-#     --genomeDir "../../data/expression/STARgenome" \
-#     --genomeFastaFiles "../../data/expression/STARgenome/GCF_000002035.6_GRCz11_genomic.nonalt.fna" \
-#     --runMode genomeGenerate \
-#     --runThreadN 25 \
-#     --sjdbGTFfile "../../data/expression/STARgenome/danRer11.nonalt.genes_tes.gtf" \
-#     --sjdbOverhang 99 
+# Generate genome indices
+/programs/STAR-2.7.5a/bin/Linux_x86_64/STAR \
+    --genomeDir "../../data/expression/STARgenome" \
+    --genomeFastaFiles "../../data/expression/STARgenome/GCF_000002035.6_GRCz11_genomic.nonalt.fna" \
+    --runMode genomeGenerate \
+    --runThreadN 25 \
+    --sjdbGTFfile "../../data/expression/STARgenome/danRer11.nonalt.genes_tes.gtf" \
+    --sjdbOverhang 99 
 
 # Align reads
 for readfile in $(cat ../../data/expression/White2017/accession_list.txt); do
