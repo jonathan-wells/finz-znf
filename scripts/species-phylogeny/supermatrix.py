@@ -40,46 +40,17 @@ def concatenate_alignments(species_list, alignments):
 
 def main():
     with open('../../data/species_genomes.txt') as infile:
-        species = [line.split()[1] for line in infile]
-    # species = ['Pimephales_promelas',
-    #            'Cyprinus_carpio',
-    #            'Sinocyclocheilus_anshuiensis',
-    #            'Sinocyclocheilus_rhinocerous',
-    #            'Sinocyclocheilus_grahami',
-    #            'Carassius_auratus',
-    #            'Oxygymnocypris_stewartii',
-    #            'Anabarilius_grahami',
-    #            'Cirrhinus_molitorella',
-    #            'Labeo_rohita',
-    #            'Poropuntius_huangchuchieni',
-    #            'Hypophthalmichthys_nobilis',
-    #            'Hypophthalmichthys_molitrix',
-    #            'Triplophysa_siluroides',
-    #            'Triplophysa_tibetana',
-    #            'Culter_alburnus',
-    #            'Megalobrama_amblycephala',
-    #            'Onychostoma_macrolepis',
-    #            'Labeo_catla',
-    #            'Leuciscus_waleckii',
-    #            'Danionella_dracula',
-    #            'Danionella_translucida',
-    #            'Danio_albolineatus',
-    #            'Danio_jaintianensis',
-    #            'Danio_choprai',
-    #            'Danio_aesculapii',
-    #            'Danio_kyathit',
-    #            'Danio_tinwini',
-    #            'Danio_rerio']
+        species = [line.split()[0] for line in infile]
     alignments = []
     dirname = '../../data/species-phylogeny'
-    for filename in os.listdir(dirname):
+    for filename in os.listdir(f'{dirname}/aligned-busco'):
         if filename.endswith('trimmed.fa'):
-            prot = filename.split('.')[0].split('_')[1]
-            alignments.append(load_orthos(f'{dirname}/{filename}'))
+            # prot = filename.split('.')[0].split('_')[1]
+            alignments.append(load_orthos(f'{dirname}/aligned-busco/{filename}'))
     concat, meta = concatenate_alignments(species, alignments)
-    with open(f'{dirname}/supermatrix_partitions.nex', 'w') as outfile:
+    with open(f'{dirname}/busco_supermatrix_partitions.nex', 'w') as outfile:
         outfile.write(meta)
-    with open(f'{dirname}/supermatrix.fa', 'w') as outfile:
+    with open(f'{dirname}/busco_supermatrix.fa', 'w') as outfile:
         for sp in concat:
             outfile.write(f'>{sp}\n')
             outfile.write(f'{concat[sp]}\n')

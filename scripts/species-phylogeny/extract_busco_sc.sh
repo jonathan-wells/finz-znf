@@ -12,13 +12,11 @@ done < ../../data/species_genomes.txt
 buscodir="../../data/busco-out"
 buscooutdir="../../data/busco-out/super"
 
-rm "${buscooutdir}/*"
-
 scseqs="run_actinopterygii_odb10/busco_sequences/single_copy_busco_sequences"
 while read -r buscoid; do
     for species in ${!genomes[@]}; do
         buscoseq="${buscodir}/${species}/${scseqs}/${buscoid}.faa"
-        sed "s/>/>${species}_${buscoid}_/" $buscoseq > tmp.fa
+        sed "s/>.\+$/>${species}_${buscoid}/" $buscoseq > tmp.fa
         cat tmp.fa >> "${buscooutdir}/${buscoid}.fa"
     done
 done < ../../data/busco_ids.txt
