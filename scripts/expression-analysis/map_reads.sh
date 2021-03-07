@@ -16,11 +16,11 @@ for readfile in $(cat ../../data/expression/White2017/accession_list.txt); do
         --genomeDir "../../data/expression/STARgenome" \
         --readFilesIn "../../data/expression/White2017/${readfile}_1.fastq.gz" "../../data/expression/White2017/${readfile}_2.fastq.gz" \
         --readFilesCommand gunzip -c \
-        --runThreadN 8 \
+        --runThreadN 12 \
         --outSAMtype BAM Unsorted \
         --runMode alignReads \
-        --outFilterMultimapNmax 5000 \
-        --winAnchorMultimapNmax 5000 \
+        --outFilterMultimapNmax 250 \
+        --winAnchorMultimapNmax 500 \
         --outMultimapperOrder Random \
         --alignIntronMax 500000 \
         --alignMatesGapMax 500000 \

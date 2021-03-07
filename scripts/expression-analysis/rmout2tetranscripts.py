@@ -38,7 +38,7 @@ def parse_attrs(line, dupdict):
     return transcript_id, gene_id, family_id, class_id
 
 def format_attrs(transcript_id, gene_id, family_id, class_id):
-    return f'transcript_id "{transcript_id}"; gene_id "{gene_id}"; family_id "{family_id}"; class_id "{class_id}";'
+    return f'gene_id "{gene_id}"; transcript_id "{transcript_id}"; family_id "{family_id}"; class_id "{class_id}";'
 
 def main():
     dupdict = defaultdict(int)
