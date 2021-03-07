@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 
 seqdir="/Users/jonwells/Projects/feschottelab/finz-znf/data/seqs"
-seqdump="${seqdir}/seqdump"
+seqdump="${seqdir}/seqdump_denovo_chr4"
 
-# fastaexplode -f "${seqdir}/cypriniformes_augustus_finz.fa" -d $seqdump
+# fastaexplode -f "${seqdir}/denovo_chr4_augustus_finz.fa" -d $seqdump
  
 # i=0
 # for file in `ls $seqdump`; do
@@ -11,17 +11,17 @@ seqdump="${seqdir}/seqdump"
 #         continue
 #     fi
 #     echo $i
-#     water -asequence "${seqdump}/${file}" \
-#         -bsequence "${seqdir}/cypriniformes_augustus_finz.fa" \
+#     needle -asequence "${seqdump}/${file}" \
+#         -bsequence "${seqdir}/denovo_chr4_augustus_finz.fa" \
 #         -gapopen 12.0 \
-#         -gapextend 0.0 \
-#         -outfile "${seqdump}/water${i}.out"
+#         -gapextend 0.1 \
+#         -outfile "${seqdump}/denovo_chr4_needle${i}.out"
         
 #     ((i=i+1))
 # done
 
-for file in $seqdump/water*; do
-    # if echo $file | grep -vqe 'water.*\.out' ; then
+for file in ${seqdump}/denovo_chr4_needle*; do
+    # if echo $file | rg -v "denovo_chr4_needle.*\.out" ; then
     #     continue
     # fi
     grep '# 1:' $file | awk '{ print $3 }' > tmp1.out
@@ -33,7 +33,7 @@ done
 
 sed -i '.bak' 's/(//g' tmp4.out
 sed -i '.bak' 's/%)//g' tmp4.out
-sort -k 3 tmp4.out > ../../data/pairwise_waterman.txt
+sort -k 3 tmp4.out > ../../data/denovo_chr4_pairwise_needleman.txt
 
 ################################################################################
 ## Cleanup

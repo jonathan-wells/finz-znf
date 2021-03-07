@@ -4,6 +4,7 @@
 # finz-znfs and repeatmasker output. Converts to gtf file for downstream STAR
 
 ./rename_ensembl_chroms.py ../../data/gffs/Danio_rerio.GRCz11.101.gff3 subtracted.base.gff3
+rg -v '_UTR' subtracted.base.gff3 > tmp; mv tmp subtracted.base.gff3
 gffread -T subtracted.base.gff3 -o subtracted.base.gtf
 gffread -T ../../data/gffs/ensembl_finz_znf.gff | awk '{ OFS="\t" }{ print $2, $3, $4, $5, $6, $7}' > subtracted.txt
 rg -v -f subtracted.txt subtracted.base.gtf > subtracted.gtf
@@ -22,5 +23,5 @@ ln -s ../../data/gffs/Danio_rerio.GRCz11.101.curated_finz.gtf ../../data/express
 ln -s ../../data/gffs/danRer11.nonalt.tetranscripts.gtf ../../data/expression
 ln -s ../../data/gffs/danRer11.nonalt.genes_tes.gtf ../../data/expression
 
-rm subtracted* ../../data/gffs/Danio_rerio_finz.final.gtf
+rm subtracted*
 
