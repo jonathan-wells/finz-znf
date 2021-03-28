@@ -12,10 +12,11 @@ declare -A genomes
 # done < ../../data/species_genomes.txt
 
 genomes=(
-    ['Labeo_gonius']='GCA_014525385.1_HRRL_MCC_1.0_genomic.fna'
-    ['Chanos_chanos']='GCF_902362185.1_fChaCha1.1_genomic.fna'
-    ['Triplophysa_dalaica']='GCA_015846415.1_ASM1584641v1_genomic.fna'
-)
+    ['Labeo_gonius']='GCA_013461565.1_ASM1346156v1_genomic.fna'
+    ['Paedocypris_carbunculus']='QDDN_carbunculus.CA_carbunculus.softmasked.fna'
+    ['Paedocypris_micromegethes']='QDDN_micromegethes.CA_micromegethes.softmasked.fna'
+    )
+
 
 for species in ${!genomes[@]}; do
     busco \
@@ -24,5 +25,6 @@ for species in ${!genomes[@]}; do
         -o $species \
         --out_path "../../data/busco-out/" \
         -m "genome" \
-        -c 40
+        -c 40 \
+        -f
 done
