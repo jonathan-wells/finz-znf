@@ -4,7 +4,7 @@ from Bio import SeqIO
 from collections import defaultdict
 import os
 
-def load_orthos(filename):
+def load_orthos(filename, mintaxa):
     alignment = defaultdict(list)
     for record in SeqIO.parse(filename, 'fasta'):
         if 'X' in record.seq:
@@ -15,6 +15,8 @@ def load_orthos(filename):
         if len(alignment[species]) > 1:
             alignment.pop(species)
     alignment = {key: val[0] for key, val in alignment.items()}
+    if len(alignment) < mintaxa:
+        return None
     return alignment
 
 def concatenate_alignments(species_list, alignments):
@@ -45,8 +47,9 @@ def main():
     dirname = '../../data/species-phylogeny'
     for filename in os.listdir(f'{dirname}/aligned-busco'):
         if filename.endswith('trimmed.fa'):
-            # prot = filename.split('.')[0].split('_')[1]
-            alignments.append(load_orthos(f'{dirname}/aligned-busco/{filename}'))
+            alignment = load_orthos(f'{dirname}/aligned-busco/{filename}', 10)
+            if alignment != None:
+                alignments.append(alignment)
     concat, meta = concatenate_alignments(species, alignments)
     with open(f'{dirname}/busco_supermatrix_partitions.nex', 'w') as outfile:
         outfile.write(meta)
