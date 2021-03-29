@@ -49,13 +49,14 @@ def clean_alignments(species_list, alignments, min_species):
     for ali in alignments:
         ali_species = set(ali.keys())
         length = len(list(ali.values())[0].seq)
+        busco = list(ali.values())[0].name.split('_')[-1]
         nspecies = len(species_set.intersection(ali_species))
         if nspecies < min_species:
             continue
+        
         for sp in species_list:
             record = ali.get(sp, False)
             if record:
-                busco = record.id.split('_')[-1]
                 record.id = sp
                 record.name = sp
                 record.description = busco
