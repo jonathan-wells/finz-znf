@@ -85,13 +85,15 @@ def main():
     for sp in exclude:
         species.remove(sp)
     
+    min_species = 24
+
     alignments = []
     dirname = '../../data/species-phylogeny'
     for filename in os.listdir(f'{dirname}/aligned-busco'):
         if filename.endswith('trimmed.fa'):
             alignment = load_orthos(f'{dirname}/aligned-busco/{filename}',
                                     species, 
-                                    25)
+                                    min_species)
             if alignment != None:
                 alignments.append(alignment)
     
@@ -105,7 +107,6 @@ def main():
             outfile.write(f'{concat[sp]}\n')
     
     # Write RevBayes data
-    min_species = 25
     cleaned_alignments = clean_alignments(species, alignments, min_species)
     for busco, alignment in cleaned_alignments.items():
         SeqIO.write(alignment, 
