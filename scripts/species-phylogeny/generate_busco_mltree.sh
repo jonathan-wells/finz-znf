@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-treedir="../../data/species-phylogeny"
+treedir="../../data/species-phylogeny/iqtree-data"
 iqtree2 \
     -s "${treedir}/busco_supermatrix.fa" \
     -p "${treedir}/busco_supermatrix_partitions.nex" \
@@ -11,5 +11,4 @@ iqtree2 \
     --boot-trees \
     --alrt 1000 \
     -B 5000 \
-    -T 40 \
-    --redo-tree
+    -T 40 

@@ -1,15 +1,17 @@
 #!/usr/bin/env python3
 
 from Bio import SeqIO
+from Bio.Seq import Seq
+from Bio.SeqRecord import SeqRecord
 from collections import defaultdict
 import os
 
-def load_orthos(filename, mintaxa):
+def load_orthos(filename, species_list, mintaxa):
     alignment = defaultdict(list)
     for record in SeqIO.parse(filename, 'fasta'):
-        # if 'X' in record.seq:
-        #     continue
         species = '_'.join(record.id.split('_')[:2])
+        if species not in species_list:
+            continue
         alignment[species].append(record)
     for species in list(alignment.keys()):
         if len(alignment[species]) > 1:
@@ -46,16 +48,24 @@ def clean_alignments(species_list, alignments, min_species):
     cleaned_alignments = defaultdict(list)
     for ali in alignments:
         ali_species = set(ali.keys())
+        length = len(list(ali.values())[0].seq)
         nspecies = len(species_set.intersection(ali_species))
         if nspecies < min_species:
             continue
-        for sp, record in ali.items():
-            if sp not in species_set:
-                continue
-            busco = record.id.split('_')[-1]
-            record.id = sp
-            record.name = sp
-            record.description = busco
+        for sp in species_list:
+            record = ali.get(sp, False)
+            if record:
+                busco = record.id.split('_')[-1]
+                record.id = sp
+                record.name = sp
+                record.description = busco
+            else:
+                record = SeqRecord(
+                               Seq('-'*length),
+                               id=sp,
+                               name=sp,
+                               description=busco
+                               )
             cleaned_alignments[busco].append(record)
     return cleaned_alignments
 
@@ -78,7 +88,9 @@ def main():
     dirname = '../../data/species-phylogeny'
     for filename in os.listdir(f'{dirname}/aligned-busco'):
         if filename.endswith('trimmed.fa'):
-            alignment = load_orthos(f'{dirname}/aligned-busco/{filename}', 10)
+            alignment = load_orthos(f'{dirname}/aligned-busco/{filename}',
+                                    species, 
+                                    25)
             if alignment != None:
                 alignments.append(alignment)
     
@@ -92,7 +104,7 @@ def main():
             outfile.write(f'{concat[sp]}\n')
     
     # Write RevBayes data
-    min_species = len(species) - 1
+    min_species = 25
     cleaned_alignments = clean_alignments(species, alignments, min_species)
     for busco, alignment in cleaned_alignments.items():
         SeqIO.write(alignment, 
