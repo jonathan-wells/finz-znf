@@ -14,10 +14,14 @@ while read line; do
     genomes[$key]="$data"
 done < ../../data/species_genomes.txt
 
+genomes=(
+    [Paedocypris_carbunculus]=QDDN_carbunculus.CA_carbunculus.softmasked.fna
+    [Paedocypris_micromegethes]=QDDN_micromegethes.CA_micromegethes.softmasked.fna
+)
+
 for species in ${!genomes[@]}; do
     genomefile=${genomes[$species]}
     echo $species
-    
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # 1. Extract genome contig/scaffold/chromosome lengths
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -67,24 +71,24 @@ for species in ${!genomes[@]}; do
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # 4. Augustus-ppx to annotate predicted FINZ-znfs
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-     augustus \
-         --genemodel=complete \
-         --optCfgFile=/usr/local/Cellar/augustus/3.3.3_1/config/ppx.cfg \
-         --proteinprofile=../../data/phmms/drerio_finz_expressed.prfl \
-         --species=zebrafish \
-          "../../data/seqs/${species}_finz_blocks.fa" > "../../data/gffs/${species}_augustus_finz.gff"
+    /usr/local/Cellar/augustus/3.3.3_1/bin/augustus \
+        --genemodel=complete \
+        --optCfgFile=/usr/local/Cellar/augustus/3.3.3_1/config/ppx.cfg \
+        --proteinprofile=../../data/phmms/drerio_finz_expressed.prfl \
+        --species=zebrafish \
+        "../../data/seqs/${species}_finz_blocks.fa" > "../../data/gffs/${species}_augustus_finz.gff"
 
-      # Extract all protein sequences
-      /usr/local/Cellar/augustus/3.3.3_1/scripts/getAnnoFasta.pl \
-          "../../data/gffs/${species}_augustus_finz.gff" \
-          --seqfile="../../data/seqs/${species}_finz_blocks.fa"
+    # Extract all protein sequences
+    /usr/local/Cellar/augustus/3.3.3_1/scripts/getAnnoFasta.pl \
+        "../../data/gffs/${species}_augustus_finz.gff" \
+        --seqfile="../../data/seqs/${species}_finz_blocks.fa"
     
        # Rename seqs by prepending species name
-       for suffix in codingseq cdsexons aa; do
-           mv "../../data/gffs/${species}_augustus_finz.${suffix}" "../../data/seqs/${species}_augustus_finz.${suffix}.fa"
-           sed "s/>/>${species}_/g" "../../data/seqs/${species}_augustus_finz.${suffix}.fa" > tmp.fa
-           mv tmp.fa "../../data/seqs/${species}_augustus_finz.${suffix}.fa"
-       done
+    for suffix in codingseq cdsexons aa; do
+        mv "../../data/gffs/${species}_augustus_finz.${suffix}" "../../data/seqs/${species}_augustus_finz.${suffix}.fa"
+        sed "s/>/>${species}_/g" "../../data/seqs/${species}_augustus_finz.${suffix}.fa" > tmp.fa
+        mv tmp.fa "../../data/seqs/${species}_augustus_finz.${suffix}.fa"
+    done
 done
 
 ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
