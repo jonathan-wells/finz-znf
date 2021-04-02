@@ -11,4 +11,4 @@ iqtree2 \
     --boot-trees \
     --alrt 1000 \
     -B 5000 \
-    -T 40 
+    -T 20 
