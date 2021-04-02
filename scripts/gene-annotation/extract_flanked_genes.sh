@@ -17,6 +17,15 @@ readaccs=(
     [Danio_tinwini]=ERR3284972
 )
 
+genomedir="/Users/jonwells/Genomes/Cypriniformes/ncbi-genomes-2020-07-09"
+declare -A genomes
+genomes=(
+    [Danio_albolineatus]="${genomedir}/GCA_903798035.1_fDanAlb1.1_genomic.fna"
+    [Danio_jaintianensis]="${genomedir}/GCA_903798115.1_fDanJai1.1_genomic.fna"
+    [Danio_choprai]="${genomedir}/GCA_903798125.1_fDanCho1.1_genomic.fna"
+    [Danio_tinwini]="${genomedir}/GCA_903798205.1_fDanTin1.1_genomic.fna"
+    )
+
 seqfile="../../data/seqs/cypriniformes_augustus_finz.fa"
 for species in ${!readaccs[@]}; do
     echo $species
@@ -39,12 +48,18 @@ for species in ${!readaccs[@]}; do
         awk '{ OFS="\t" } { print $1, $2, $9, $4, $5, $6, $7, $8 }' |
         sed "s/ID=/${species}_/" > tmp.bed
 
-    # Extract fasta seqs
+    # Extract finz fasta seqs
     bedtools getfasta \
         -fi "../../data/seqs/${species}_finz_blocks.fa" \
         -bed tmp.bed \
-        -fo "../../data/danio-reads/${species}_flanked_finz.fa" \
+        -fo "../../data/danio-reads/${species}_flanked_genes.fa" \
         -nameOnly
+
+    # Extract busco fasta seqs
+    bedtools getfasta \
+        -fi ${genomes[$species]} \
+        -bed "../../data/danio-reads/${species}_busco.bed" \
+        -nameOnly >> "../../data/danio-reads/${species}_flanked_genes.fa" 
 done
 
 rm tmp.bed tmp.gff genepattern.txt blocks_genome.bed
