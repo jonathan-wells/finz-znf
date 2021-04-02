@@ -58,14 +58,14 @@ def clean_alignments(species_list, alignments, min_species):
             record = ali.get(sp, False)
             if record:
                 record.id = sp
-                record.name = sp
-                record.description = busco
+                record.name 
+                record.description = ''
             else:
                 record = SeqRecord(
                                Seq('-'*length),
                                id=sp,
                                name=sp,
-                               description=busco
+                               description=''
                                )
             cleaned_alignments[busco].append(record)
     return cleaned_alignments
@@ -85,7 +85,9 @@ def main():
     for sp in exclude:
         species.remove(sp)
     
-    min_species = 24
+    # revbayes_min_species must be > iqtree_min_species
+    iqtree_min_species = 10
+    revbayes_min_species = 27
 
     alignments = []
     dirname = '../../data/species-phylogeny'
@@ -93,21 +95,21 @@ def main():
         if filename.endswith('trimmed.fa'):
             alignment = load_orthos(f'{dirname}/aligned-busco/{filename}',
                                     species, 
-                                    min_species)
+                                    iqtree_min_species)
             if alignment != None:
                 alignments.append(alignment)
     
-    # Write iqtree data
-    concat, meta = concatenate_alignments(species, alignments)
-    with open(f'{dirname}/iqtree-data/busco_supermatrix_partitions.nex', 'w') as outfile:
-        outfile.write(meta)
-    with open(f'{dirname}/iqtree-data/busco_supermatrix.fa', 'w') as outfile:
-        for sp in concat:
-            outfile.write(f'>{sp}\n')
-            outfile.write(f'{concat[sp]}\n')
+    # # Write iqtree data
+    # concat, meta = concatenate_alignments(species, alignments)
+    # with open(f'{dirname}/iqtree-data/busco_supermatrix_partitions.nex', 'w') as outfile:
+    #     outfile.write(meta)
+    # with open(f'{dirname}/iqtree-data/busco_supermatrix.fa', 'w') as outfile:
+    #     for sp in concat:
+    #         outfile.write(f'>{sp}\n')
+    #         outfile.write(f'{concat[sp]}\n')
     
     # Write RevBayes data
-    cleaned_alignments = clean_alignments(species, alignments, min_species)
+    cleaned_alignments = clean_alignments(species, alignments, revbayes_min_species)
     for busco, alignment in cleaned_alignments.items():
         SeqIO.write(alignment, 
                     f'{dirname}/revbayes-data/busco-input/{busco}.fa', 
