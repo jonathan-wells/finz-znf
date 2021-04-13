@@ -40,6 +40,12 @@ for species in ${!readaccs[@]}; do
         sed 's/\.t1/$/' > genepattern.txt
     rg -f genepattern.txt "../../data/gffs/${species}_augustus_finz.gff" > tmp.gff
     
+    sed 's/\$/($|\\\.)/' genepattern.txt > genepattern2.txt
+    rg -f genepattern2.txt "../../data/gffs/${species}_augustus_finz.gff" > tmp2.gff
+    ./offset_gffs.py tmp2.gff tmp3.gff 200 "${species}_"  
+    gff2bed < tmp3.gff |
+        rg "\tCDS\t" > "../../data/danio-reads/${species}_busco_cds.bed" 
+    
     # Extend flanking regions to each gene
     bedtools slop \
         -i tmp.gff \
@@ -62,4 +68,4 @@ for species in ${!readaccs[@]}; do
         -nameOnly >> "../../data/danio-reads/${species}_flanked_genes.fa" 
 done
 
-rm tmp.bed tmp.gff genepattern.txt blocks_genome.bed
+rm tmp.bed tmp{,2,3}.gff genepattern.txt genepattern2.txt blocks_genome.bed
