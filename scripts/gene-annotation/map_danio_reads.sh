@@ -8,7 +8,7 @@ readaccs=(
     [Danio_tinwini]=ERR3284972
 )
 
-genomedir="/Users/jonwells/Genomes/Cypriniformes/ncbi-genomes-2020-07-09"
+genomedir="/local/workdir/Genomes/Cypriniformes/ncbi-genomes-2020-07-09"
 declare -A genomes
 genomes=(
     [Danio_albolineatus]="${genomedir}/GCA_903798035.1_fDanAlb1.1_genomic.fna"
@@ -18,5 +18,12 @@ genomes=(
     )
 
 for species in ${!genomes[@]}; do
-    echo $species
+    /programs/minimap2-2.17/minimap2 \
+        -ax sr \
+        -t 20 \
+        --secondary=no \
+        ../../data/danio-reads/${species}_flanked_genes.fa \
+        ../../data/danio-reads/${species}_${readaccs[$species]}_1.fastq \
+        ../../data/danio-reads/${species}_${readaccs[$species]}_2.fastq \
+        > ../../data/danio-reads/${species}_${readaccs[$species]}.sam
 done
