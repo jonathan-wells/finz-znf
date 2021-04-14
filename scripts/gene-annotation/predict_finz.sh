@@ -14,11 +14,6 @@ while read line; do
     genomes[$key]="$data"
 done < ../../data/species_genomes.txt
 
-genomes=(
-    [Paedocypris_carbunculus]=QDDN_carbunculus.CA_carbunculus.softmasked.fna
-    [Paedocypris_micromegethes]=QDDN_micromegethes.CA_micromegethes.softmasked.fna
-)
-
 for species in ${!genomes[@]}; do
     genomefile=${genomes[$species]}
     echo $species
