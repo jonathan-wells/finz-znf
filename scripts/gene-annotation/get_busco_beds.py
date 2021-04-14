@@ -18,7 +18,7 @@ for species in ['Danio_albolineatus',
                 'Danio_jaintianensis',
                 'Danio_tinwini']:
     with open(f'../../data/danio-reads/{species}_busco.bed', 'w') as outfile:
-        for bid in list(scbuscoset)[:20]:
+        for bid in list(scbuscoset):
             record = list(SeqIO.parse(f'../../data/busco-out/{species}/run_actinopterygii_odb10/busco_sequences/single_copy_busco_sequences/{bid}',
                 'fasta'))[0]
             chrom, start, stop = re.split(':|-', record.id)
