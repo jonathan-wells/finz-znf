@@ -13,7 +13,7 @@ def relabel(label):
     parts = label.split('.')[0].split('_')
     gcode = parts[0][0]
     scode = ''.join(parts[1][:3])
-    gene = parts[2].lstrip('g')
+    gene = parts[2]
     return f'{gcode}{scode}_{gene}'
 
 def shorten(filename, outfilename):

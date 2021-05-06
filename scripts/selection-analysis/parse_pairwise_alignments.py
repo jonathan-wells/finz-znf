@@ -46,14 +46,14 @@ def parse_alignments(filename):
             g1, g2, length, ident, gaps = align
             g1, g2 = relabel(g1), relabel(g2)
             length, ident, gaps = int(length), int(ident), int(gaps) 
-            distance[(g1, g2)] = jukes_cantor_protein_dist_incgaps(ident, length)
+            distance[(g1, g2)] = jukes_cantor_protein_dist(ident, length, gaps)
     return distance    
 
 def main():
     distance = {}
     c = 0
     for filename in os.listdir(args.input):
-        if re.match('needle\d+.out', filename):
+        if re.match('needle_\d+.out', filename):
             c += 1
             if c % 10 == 0:
                 print(f'{c}...')

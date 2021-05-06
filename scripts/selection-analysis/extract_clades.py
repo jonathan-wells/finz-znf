@@ -43,11 +43,11 @@ def get_clades(tree, root, minleaves=10,maxmismatch=100,species='Danio_rerio'):
     return clades
 
 if __name__ == '__main__':
-    tree, root = load_tree('../../data/selection-analysis/needle_nj_longlabel.nwk')
+    tree, root = load_tree('../../data/selection-analysis/pairwise_needleman_longlabel.nwk')
     clades = get_clades(tree, root, 10, 30, 'Danio_rerio')
     i = 1
     for val in clades.values():
-        with open(f'../../data/selection-analysis/needle_nj_clade{i}.taxa', 'w') as outfile:
+        with open(f'../../data/selection-analysis/pairwise_needleman_clade{i}.taxa', 'w') as outfile:
             outfile.write('\n'.join(sorted(val)))
         i += 1
 
