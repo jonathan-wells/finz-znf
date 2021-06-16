@@ -10,8 +10,14 @@ import pandas as pd
 gffcmp_df = pd.read_csv('../../data/gffs/gffcmp.Danio_rerio_finz.denovo.gff.tmap', sep='\t')
 keep_df = gffcmp_df.loc[~gffcmp_df.class_code.isin(['c', '='])]
 rename_df = gffcmp_df.loc[gffcmp_df.class_code.isin(['c', '='])]
-transcript_dict = dict(zip(rename_df['qry_id'], rename_df['ref_id']))
-gene_dict = dict(zip(rename_df['qry_gene_id'], rename_df['ref_gene_id']))
+
+# Use these to rename with ensembl ids
+# transcript_dict = dict(zip(rename_df['qry_id'], rename_df['ref_id']))
+# gene_dict = dict(zip(rename_df['qry_gene_id'], rename_df['ref_gene_id']))
+
+# Use these to keep names the same
+transcript_dict = dict(zip(rename_df['qry_id'], rename_df['qry_id']))
+gene_dict = dict(zip(rename_df['qry_gene_id'], rename_df['qry_gene_id']))
 
 with open('../../data/gffs/Danio_rerio_finz.final.gff', 'w') as outfile:
     with open('../../data/gffs/Danio_rerio_finz.denovo.gff') as infile:

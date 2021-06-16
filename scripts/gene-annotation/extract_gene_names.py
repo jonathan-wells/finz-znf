@@ -65,15 +65,18 @@ def extract_ensembl_gff(proteinfile):
 
 def extract_denovo_gff(proteinfile):
     with open(proteinfile) as infile:
-        proteins = [line.strip() for line in infile]
-    with open('../../data/gffs/danio_rerio_hiqual_augustus_finz.gff') as infile:
+        proteins = set(line.strip() for line in infile)
+    with open('../../data/gffs/Danio_rerio_augustus_finz.gff') as infile:
         print(infile.readline().strip())
         for line in infile:
             if line.startswith('#'):
                 continue
-            gene = re.search('=(g\d+)', line)
-            if gene and gene.group(1) in proteins:
-                print(line.strip())
+            
+            gene = re.search('ID=(g\d+)\D', line)
+            if gene:
+                gene = gene.group(1)
+                if f'{gene}.t1' in proteins:
+                    print(line.strip())
             
 
 if __name__ == '__main__':
