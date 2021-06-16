@@ -12,7 +12,11 @@ for stage in "Dome" "128-cell" "1k-cell" "50pc-epiboly" "Shield" "75pc-epiboly";
 
     # Merge and sort relevant bamfiles
     samtools merge \
-        -b "${stage}.names" "${stage}.bam" 
+        -b "${stage}.names" "${stage}.bam" \
+        -h \
+        -c \
+        -p \
+        -@ 25
     samtools sort \
         -o "${stage}.sorted.bam" \
         -O BAM \
