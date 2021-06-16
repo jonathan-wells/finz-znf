@@ -1,33 +1,33 @@
 #!/usr/bin/env bash
 
-# # Extract biological replicates corresponding to stages where FiNZ-ZnF
-# # expression peaks.
-# awk '{
-#     if ($NF == "RNASeq" && 
-#         ($6 == "Dome" || 
-#          $6 == "128-cell" || 
-#          $6 == "1k-cell" || 
-#          $6 == "50pc-epiboly" || 
-#          $6 == "Shield" || 
-#          $6 == "75pc-epiboly"))
-#     print "../../data/expression/STARaligned/"$3".bam";
-# }' ../../data/expression/White2017/elife-30860-supp1-v1.tsv > merge_bams.names
+# Extract biological replicates corresponding to stages where FiNZ-ZnF
+# expression peaks.
 
-# # Merge and sort relevant bamfiles
-# bamtools merge \
-#     -list merge_bams.names \
-#     -out peak_stages.bam
-# samtools sort \
-#     -o peak_stages.sorted.bam \
-#     -O BAM \
-#     --reference ../../data/expression/STARgenome/GCF_000002035.6_GRCz11_genomic.nonalt.fna \
-#     -@ 25 \
-#     peak_stages.bam
+for stage in "Dome" "128-cell" "1k-cell" "50pc-epiboly" "Shield" "75pc-epiboly"; do
+    echo extracting $stage stage
+    awk -v stage=$stage '{
+        if ($NF == "RNASeq" && $6 == stage ) 
+            print "../../data/expression/STARaligned/"$3".bam";
+    }' ../../data/expression/White2017/elife-30860-supp1-v1.tsv > "${stage}.names"
 
-# Run Trinity in genome-guided mode to extract transcripts
-/workdir/jnw72/Software/trinityrnaseq-v2.12.0/Trinity \
-    --genome_guided_bam peak_stages.sorted.bam \
-    --max_memory 250G \
-    --genome_guided_max_intron 10000 \
-    --CPU 20 \
-    --output ../../data/expression/trinity-transcripts
+    # Merge and sort relevant bamfiles
+    samtools merge \
+        -b "${stage}.names" "${stage}.bam" 
+    samtools sort \
+        -o "${stage}.sorted.bam" \
+        -O BAM \
+        --reference ../../data/expression/STARgenome/GCF_000002035.6_GRCz11_genomic.nonalt.fna \
+        -@ 25 \
+        "${stage}.bam"
+    rm "${stage}.bam" "${stage}.names"
+
+
+    # Run Trinity in genome-guided mode to extract transcripts
+    echo running trinity for stage $stage
+    /workdir/jnw72/Software/trinityrnaseq-v2.12.0/Trinity \
+        --genome_guided_bam "${stage}.sorted.bam"  \
+        --max_memory 500G \
+        --genome_guided_max_intron 10000 \
+        --CPU 25 \
+        --output "../../data/expression/trinity-transcripts/trinity-${stage}"
+done
