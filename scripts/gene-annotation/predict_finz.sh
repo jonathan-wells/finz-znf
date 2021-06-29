@@ -4,7 +4,7 @@
 ### Annotation pipeline for predicting and curating FINZ-ZNF genes.
 #################################################################################
 
-genomedir='/Users/jonwells/Genomes/Cypriniformes/ncbi-genomes-2020-07-09'
+genomedir='/Users/jonwells/Genomes/Cypriniformes/'
 
 declare -A genomes
 
@@ -14,16 +14,22 @@ declare -A genomes
 #     genomes[$key]="$data"
 # done < ../../data/species_genomes.txt
 
-
-genomes=(
-    [Danio_rerio]="GCF_000002035.6_GRCz11_genomic.nonalt.remasked.fna"
+declare -A genomes=(
+[Puntigrus_tetrazona]=GCA_018831695.1_ASM1883169v1_genomic.fna
+[Sinocyclocheilus_maitianheensis]=GCA_018148995.1_ASM1814899v1_genomic.fna
+[Sinocyclocheilus_anophthalmus]=GCA_018155175.1_ASM1815517v1_genomic.fna
+[Gobiocypris_rarus]=GCA_018491645.1_ASM1849164v1_genomic.fna
+[Paracanthobrama_guichenoti]=GCA_018749465.1_ASM1874946v1_genomic.fna
 )
+
 for species in ${!genomes[@]}; do
     genomefile=${genomes[$species]}
     echo $species
+
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # 1. Extract genome contig/scaffold/chromosome lengths
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    
     bioawk -c fastx '{ 
         OFS="\t" 
     } { 
@@ -35,15 +41,39 @@ for species in ${!genomes[@]}; do
     # 2. tblastn to get coordinates of protein domains
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     tblastn \
-        -query ../../data/phmms/finz_seed.consensus.fa \
+        -query ../../data/phmms/cypriniformes_finz_seed.consensus.fa \
         -subject "${genomedir}/${genomefile}" \
-        -evalue 1e-03 \
+        -evalue 5e-02 \
         -outfmt 6 \
         -out "../../data/blast-out/${species}_finz_locs.out"
     
+    tblastn \
+        -query ../../data/phmms/cypriniformes_znf_seed.consensus.fa \
+        -subject "${genomedir}/${genomefile}" \
+        -evalue 5e-02 \
+        -outfmt 6 \
+        -out "../../data/blast-out/${species}_znf_locs.out"
+    
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    # 3. Extract sequence from blocks >= 100kb around FINZ hits
+    # 3. Unmask regions containing finz or znf hits
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    
+    cat "../../data/blast-out/${species}_finz_locs.out" \
+        "../../data/blast-out/${species}_znf_locs.out" \
+        > "../../data/blast-out/${species}_finz_znf_locs.out"
+    
+    # Unmask finz-znf hits with 10bp window either side.
+    ./unmask.py \
+        "${genomedir}/${genomefile}" \
+        "../../data/blast-out/${species}_finz_znf_locs.out" \
+        "${genomedir}/${species}.remasked.fa" 
+    
+    rm "../../data/blast-out/${species}_finz_znf_locs.out"
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # 4. Extract sequence from blocks >= 30kb around FINZ hits
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    
     awk '{ 
         OFS="\t"
         } {
@@ -56,89 +86,124 @@ for species in ${!genomes[@]}; do
 
     # Extract blocks
     bedtools slop \
-        -b 50000 \
+        -b 15000 \
         -i "../../data/beds/${species}_finz.bed" \
         -g "../../data/beds/${species}.genome" |
         bedtools merge > "../../data/beds/${species}_finz_blocks.bed"
 
     # Extract sequence
     bedtools getfasta \
-        -fi "${genomedir}/${genomefile}" \
-        -bed "../../data/beds/${species}_finz_blocks.bed" > "../../data/seqs/${species}_finz_blocks.fa"
+        -fi "${genomedir}/${species}.remasked.fa" \
+        -bed "../../data/beds/${species}_finz_blocks.bed" \
+        > "../../data/seqs/${species}_finz_blocks.fa"
+    
+    # finz-znf-unmasked genome no longer required
+    rm "${genomedir}/${species}.remasked.fa"
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    # 4. Augustus-ppx to annotate predicted FINZ-znfs
+    # 5. Augustus-PPX to annotate predicted FiNZ-ZnFs
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    
+    # Run augustus - see config files for more detailed params
     /usr/local/Cellar/augustus/3.3.3_1/bin/augustus \
         --genemodel=complete \
         --optCfgFile=/usr/local/Cellar/augustus/3.3.3_1/config/ppx.cfg \
-        --proteinprofile=../../data/phmms/drerio_finz_expressed.prfl \
+        --proteinprofile=../../data/phmms/cypriniformes_finz_znf.prfl \
         --species=zebrafish \
+        --minexonintronprob=0.2 \
         --softmasking=1 \
-        "../../data/seqs/${species}_finz_blocks.fa" > "../../data/gffs/${species}_augustus_finz.gff"
+        "../../data/seqs/${species}_finz_blocks.fa" \
+        > "../../data/gffs/${species}_augustus_finz.gff"
+    
+    # Output GFF coords correspond to finz blocks, so revert back to original
+    # genome coords.
+    ./offset_gffs.py \
+        "../../data/gffs/${species}_augustus_finz.gff" \
+        "../../data/gffs/${species}_augustus_finz.gff"
 
     # Extract all protein sequences
     /usr/local/Cellar/augustus/3.3.3_1/scripts/getAnnoFasta.pl \
         "../../data/gffs/${species}_augustus_finz.gff" \
-        --seqfile="../../data/seqs/${species}_finz_blocks.fa"
+        --seqfile="${genomedir}/${genomefile}"
     
     # Rename seqs by prepending species name
-    for suffix in codingseq cdsexons aa; do
-        mv "../../data/gffs/${species}_augustus_finz.${suffix}" "../../data/seqs/${species}_augustus_finz.${suffix}.fa"
-        sed "s/>/>${species}_/g" "../../data/seqs/${species}_augustus_finz.${suffix}.fa" > tmp.fa
+    for suffix in "codingseq" "cdsexons" "aa"; do
+        mv "../../data/gffs/${species}_augustus_finz.${suffix}" \
+            "../../data/seqs/${species}_augustus_finz.${suffix}.fa"
+        sed \
+            "s/>/>${species}_/g" \
+            "../../data/seqs/${species}_augustus_finz.${suffix}.fa" > tmp.fa
         mv tmp.fa "../../data/seqs/${species}_augustus_finz.${suffix}.fa"
     done
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # 6. HMMER to extract only predicted FINZ-ZNFs, and exclude potential
+    #    pseudogenes with missing data.
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    hmmsearch \
+        --tblout tmp.out \
+        -E 1e-02 \
+        ../../data/phmms/cypriniformes_finz_seed.hmm \
+        "../../data/seqs/${species}_augustus_finz.aa.fa"
+    rg -v '^#' tmp.out | awk '{ print $1 }' | sort | uniq > finz.names
+
+    hmmsearch \
+        --tblout tmp.out \
+        -E 1e-02 \
+        ../../data/phmms/cypriniformes_znf_seed.hmm \
+        "../../data/seqs/${species}_augustus_finz.aa.fa"
+    rg -v '^#' tmp.out | awk '{ print $1 }' | sort | uniq > znf.names
+
+    # Generate set of labels for aa and codingseq
+    cat finz.names znf.names | sort | uniq -d > finz_znf.names
+   
+    # Exclude genes with missing data.
+    rg -B 1 'X' "../../data/seqs/${species}_augustus_finz.aa.fa" |
+        rg '>' | cut -c 2- > exclude.names
+    rg -v -f exclude.names finz_znf.names > tmp.names
+    mv tmp.names finz_znf.names
+    rm exclude.names
+
+    # Generate labels for cdsexons
+    sed "s/$/.cds/" finz_znf.names > tmp.names
+    rg -f tmp.names "../../data/seqs/${species}_augustus_finz.cdsexons.fa" \
+        > finz_znf.cds.names
+    rm tmp.names
+    
+    # Filter out non-FiNZ-ZnFs from output files
+    seqtk subseq \
+        "../../data/seqs/${species}_augustus_finz.aa.fa" \
+        finz_znf.names \
+        > tmp.aa.fa
+    mv tmp.aa.fa "../../data/seqs/${species}_augustus_finz.aa.fa"
+
+    seqtk subseq \
+        "../../data/seqs/${species}_augustus_finz.codingseq.fa" \
+        finz_znf.names \
+        > tmp.codingseq.fa
+    mv tmp.codingseq.fa "../../data/seqs/${species}_augustus_finz.codingseq.fa"
+    
+    seqtk subseq \
+        "../../data/seqs/${species}_augustus_finz.cdsexons.fa" \
+        finz_znf.names \
+        > tmp.cdsexons.fa
+    mv tmp.cdsexons.fa "../../data/seqs/${species}_augustus_finz.cdsexons.fa"
+
 done
 
-##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-## 5. HMMER to extract only predicted FINZ-ZNFs
-##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-cat ../../data/seqs/*_augustus_finz.aa.fa > tmp.fa 
-# cat ../../data/seqs/*_augustus_finz.codingseq.fa > tmp2.fa 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# 7. Combine species protein files and clean up
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-# Original is 1e-04 for both
-hmmsearch --tblout tmp.out \
-    -E 1e-02 \
-    ../../data/phmms/finz_seed.hmm \
-    tmp.fa
-rg -v '^#' tmp.out | awk '{ print $1 }' | sort | uniq > finz.names
+if test -f "../../data/seqs/cypriniformes_augustus_finz.fa"; then
+    rm "../../data/seqs/cypriniformes_augustus_finz.fa"
+fi
 
-hmmsearch --tblout tmp.out \
-    -E 1e-02 \
-    ../../data/phmms/PF00096_seed.hmm \
-    tmp.fa
-rg -v '^#' tmp.out | awk '{ print $1 }' | sort | uniq > c2h2.names
+for species in ${!genomes[@]}; do
+    cat "../../data/seqs/${species}_augustus_finz.aa.fa" \
+    >> "../../data/seqs/cypriniformes_augustus_finz.fa"
+done
 
-# for species in ${!genomes[@]}; do
-#     hmmsearch --tblout tmp.out \
-#         -E 0.1 \
-#         ../../data/phmms/finz_iter1.hmm \
-#         "../../data/seqs/${species}_augustus_finz.aa.fa"
-#     rg -v '^#' tmp.out | awk '{ print $1 }' | sort | uniq >> finz.names
-
-#     hmmsearch --tblout tmp.out \
-#         -E 0.1 \
-#         ../../data/phmms/PF00096_seed.hmm \
-#         "../../data/seqs/${species}_augustus_finz.aa.fa"
-#     rg -v '^#' tmp.out | awk '{ print $1 }' | sort | uniq >> c2h2.names
-
-# #     blastp \
-# #         -query ../../data/phmms/finz_seed.consensus.fa \
-# #         -subject "../../data/seqs/${species}_augustus_finz.aa.fa" \
-# #         -evalue 1 \
-# #         -outfmt 6 |
-# #         awk '{ print $2 }' | sort | uniq >> finz.names
-# #     blastp \
-# #         -query ../../data/phmms/PF00096_seed.consensus.fa \
-# #         -subject "../../data/seqs/${species}_augustus_finz.aa.fa" \
-# #         -evalue 1 \
-# #         -outfmt 6 |
-# #         awk '{ print $2 }' | sort | uniq >> c2h2.names
-# done
-
-cat finz.names c2h2.names | sort | uniq -d > finz_znf.names
-seqtk subseq tmp.fa finz_znf.names > ../../data/seqs/cypriniformes_augustus_finz.fa
-seqtk subseq tmp2.fa finz_znf.names >../../data/seqs/cypriniformes_augustus_finz.dna.fa
-
-rm tmp*.fa tmp.out *.names
+rm tmp.out *.names
 
