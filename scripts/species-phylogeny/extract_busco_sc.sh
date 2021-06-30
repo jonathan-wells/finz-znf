@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-genomedir="/local/workdir/jnw72/Genomes/ncbi-genomes-2020-07-09"
+genomedir="/local/workdir/jnw72/Genomes"
 declare -A genomes
 
 while read line; do
@@ -17,8 +17,10 @@ scseqs="run_actinopterygii_odb10/busco_sequences/single_copy_busco_sequences"
 while read -r buscoid; do
     for species in ${!genomes[@]}; do
         buscoseq="${buscodir}/${species}/${scseqs}/${buscoid}.faa"
-        sed "s/>.\+$/>${species}_${buscoid}/" $buscoseq > tmp.fa
-        cat tmp.fa >> "${buscooutdir}/${buscoid}.fa"
+        if test -f $buscoseq; then
+            sed "s/>.\+$/>${species}_${buscoid}/" $buscoseq > tmp.fa
+            cat tmp.fa >> "${buscooutdir}/${buscoid}.fa"
+        fi
     done
 done < ../../data/busco_ids.txt
 rm tmp.fa

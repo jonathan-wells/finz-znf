@@ -74,17 +74,6 @@ def main():
     with open('../../data/species_genomes.txt') as infile:
         species = [line.split()[0] for line in infile]
     
-    # Exclude these species because of poor genome quality
-    exclude = ['Pimephales_promelas',
-               'Cirrhinus_molitorella',
-               'Labeo_gonius',
-               'Poropuntius_huangchuchieni',
-               'Hypophthalmichthys_nobilis',
-               'Paedocypris_carbunculus',
-               'Paedocypris_micromegethes']
-    for sp in exclude:
-        species.remove(sp)
-    
     # revbayes_min_species must be > iqtree_min_species
     iqtree_min_species = 10
     revbayes_min_species = 27
@@ -99,21 +88,21 @@ def main():
             if alignment != None:
                 alignments.append(alignment)
     
-    # # Write iqtree data
-    # concat, meta = concatenate_alignments(species, alignments)
-    # with open(f'{dirname}/iqtree-data/busco_supermatrix_partitions.nex', 'w') as outfile:
-    #     outfile.write(meta)
-    # with open(f'{dirname}/iqtree-data/busco_supermatrix.fa', 'w') as outfile:
-    #     for sp in concat:
-    #         outfile.write(f'>{sp}\n')
-    #         outfile.write(f'{concat[sp]}\n')
+    # Write iqtree data
+    concat, meta = concatenate_alignments(species, alignments)
+    with open(f'{dirname}/iqtree-data/busco_supermatrix_partitions.nex', 'w') as outfile:
+        outfile.write(meta)
+    with open(f'{dirname}/iqtree-data/busco_supermatrix.fa', 'w') as outfile:
+        for sp in concat:
+            outfile.write(f'>{sp}\n')
+            outfile.write(f'{concat[sp]}\n')
     
-    # Write RevBayes data
-    cleaned_alignments = clean_alignments(species, alignments, revbayes_min_species)
-    for busco, alignment in cleaned_alignments.items():
-        SeqIO.write(alignment, 
-                    f'{dirname}/revbayes-data/busco-input/{busco}.fa', 
-                    'fasta')
+    # # Write RevBayes data
+    # cleaned_alignments = clean_alignments(species, alignments, revbayes_min_species)
+    # for busco, alignment in cleaned_alignments.items():
+    #     SeqIO.write(alignment, 
+    #                 f'{dirname}/revbayes-data/busco-input/{busco}.fa', 
+    #                 'fasta')
     
 
 if __name__ == '__main__':
