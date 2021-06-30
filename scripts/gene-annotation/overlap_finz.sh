@@ -5,6 +5,8 @@
 # genes from the corresponding gff files in order to calculate degree of overlap
 # the new predictions from augustus-ppx.
 
+# TODO: change denovo_finz block to use existing Danio rerio annotations.
+
 declare -A annotations
 annotations=(
     [RefSeq]=../../data/seqs/GCF_000002035.6_GRCz11_protein.faa

@@ -3,6 +3,9 @@
 import re
 import pandas as pd
 
+##### LEGACY #####
+
+
 # This script checks overlaps of denovo finz annotations with those of ensembl,
 # and renames denovo with existing Ensembl annotations, where appropriate.
 # Relies on the output of gffcompare -r ensembl_finz_znf.gff denovo_finz_znf.gff
