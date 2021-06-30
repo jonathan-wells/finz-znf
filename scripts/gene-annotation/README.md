@@ -14,7 +14,11 @@ Lots going on here, but there are two main groups of scripts:
 3. `map_danio_reads.sh`
 4. `blast_busco_exons.sh`
 
-### Comparison with 
-Various accessory scripts:
+### Comparison with Ensembl and RefSeq annotations
+1. ``
 
+
+## Accessory scripts used within other progs:
+1. `offset_gffs.py`
+2. `unmask.py`
 
