@@ -3,7 +3,7 @@
 # First activate busco venv with:
 # $ conda activate buscoenv
 
-genomedir="/workdir/jnw72/Genomes/ncbi-genomes-2020-07-09"
+genomedir="/workdir/jnw72/Genomes"
 declare -A genomes
 # while read line; do
 #     key=`awk '{ print $1 }' <<< $line`
@@ -12,10 +12,12 @@ declare -A genomes
 # done < ../../data/species_genomes.txt
 
 genomes=(
-    ['Labeo_gonius']='GCA_013461565.1_ASM1346156v1_genomic.fna'
-    ['Paedocypris_carbunculus']='QDDN_carbunculus.CA_carbunculus.softmasked.fna'
-    ['Paedocypris_micromegethes']='QDDN_micromegethes.CA_micromegethes.softmasked.fna'
-    )
+[Puntigrus_tetrazona]=GCA_018831695.1_ASM1883169v1_genomic.fna
+[Sinocyclocheilus_maitianheensis]=GCA_018148995.1_ASM1814899v1_genomic.fna
+[Sinocyclocheilus_anophthalmus]=GCA_018155175.1_ASM1815517v1_genomic.fna
+[Gobiocypris_rarus]=GCA_018491645.1_ASM1849164v1_genomic.fna
+[Paracanthobrama_guichenoti]=GCA_018749465.1_ASM1874946v1_genomic.fna
+)
 
 
 for species in ${!genomes[@]}; do
