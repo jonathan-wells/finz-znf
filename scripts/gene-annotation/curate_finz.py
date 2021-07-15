@@ -10,7 +10,7 @@ import pandas as pd
 # and renames denovo with existing Ensembl annotations, where appropriate.
 # Relies on the output of gffcompare -r ensembl_finz_znf.gff denovo_finz_znf.gff
 
-gffcmp_df = pd.read_csv('../../data/gffs/gffcmp.Danio_rerio_finz.denovo.gff.tmap', sep='\t')
+gffcmp_df = pd.read_csv('../../data/gffs/gffcmp.denovo_finz_znf.gff.tmap', sep='\t')
 keep_df = gffcmp_df.loc[~gffcmp_df.class_code.isin(['c', '='])]
 rename_df = gffcmp_df.loc[gffcmp_df.class_code.isin(['c', '='])]
 
@@ -23,7 +23,7 @@ transcript_dict = dict(zip(rename_df['qry_id'], rename_df['qry_id']))
 gene_dict = dict(zip(rename_df['qry_gene_id'], rename_df['qry_gene_id']))
 
 with open('../../data/gffs/Danio_rerio_finz.final.gff', 'w') as outfile:
-    with open('../../data/gffs/Danio_rerio_finz.denovo.gff') as infile:
+    with open('../../data/gffs/denovo_finz_znf.gff') as infile:
         for line in infile:
             line = line.strip().split('\t')
             if line[2] == 'gene':

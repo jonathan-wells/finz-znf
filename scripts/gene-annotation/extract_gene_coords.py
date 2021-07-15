@@ -7,7 +7,8 @@ import sys
 
 def get_offset_gff(species):
     filename = f'../../data/gffs/{species}_augustus_finz.gff'
-    gff = og.offset_gff(filename)
+    with open(filename) as infile:
+        gff = [line.strip() for line in infile]
     return gff
 
 def get_finz_genes(species):

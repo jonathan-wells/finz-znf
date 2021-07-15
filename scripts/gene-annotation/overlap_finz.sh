@@ -38,7 +38,6 @@ done
 rg Danio_rerio ../../data/seqs/cypriniformes_augustus_finz.fa |
     cut -c 14- > denovo_finz_znf.names
 ./extract_gene_names.py denovo > "../../data/gffs/denovo_finz_znf.gff"
-./offset_gffs.py ../../data/gffs/denovo_finz_znf.gff ../../data/gffs/denovo_finz_znf.gff
 rm *.names tmp.out
 
 # Then calculate overlap

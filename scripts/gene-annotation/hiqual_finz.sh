@@ -1,43 +1,37 @@
 #!/usr/bin/env bash
 
-blat \
-    -minIdentity=97 \
-    ../../data/seqs/Danio_rerio_finz_blocks.fa \
-    ../../data/expression/expressed.cds.fa \
-    expressed.cds.psl
-pslCDnaFilter -maxAligns=3 expressed.cds.psl expressed.cds.f.psl
-/usr/local/Cellar/augustus/3.3.3_1/scripts/blat2hints.pl --in=expressed.cds.f.psl --out=hints.E.gff
-
-augustus \
-    --species=zebrafish \
+/usr/local/Augustus/bin/augustus \
     --genemodel=complete \
-    --strand=both \
-    --optCfgFile=/usr/local/Cellar/augustus/3.3.3_1/config/ppx.cfg \
-    --extrinsicCfgFile=/usr/local/Cellar/augustus/3.3.3_1/config/extrinsic/extrinsic.MPE.cfg \
-    --proteinprofile=../../data/phmms/drerio_finz_expressed.prfl \
-    --hintsfile=../../data/expression/hints.E.gff \
-    --stopCodonExcludedFromCDS=false \
-    --codingseq=on \
-    --protein=on \
-    --outfile=danio_rerio_hiqual_augustus_finz.gff \
-    ../../data/seqs/Danio_rerio_finz_blocks.fa
+    --species=zebrafish_new \
+    --minexonintronprob=0.2 \
+    --optCfgFile=/usr/local/Augustus/config/ppx.cfg \
+    --proteinprofile=/Users/jonwells/Projects/feschottelab/finz-znf/data/phmms/drerio_finz_expressed2.prfl \
+    --UTR=on \
+    --softmasking=1 \
+    "../../data/seqs/Danio_rerio_finz_blocks.fa" \
+    > "Danio_rerio_hiqual_finz.gff"
 
-/usr/local/Cellar/augustus/3.3.3_1/scripts/getAnnoFasta.pl \
-    "danio_rerio_hiqual_augustus_finz.gff" \
-    --seqfile="../../data/seqs/Danio_rerio_finz_blocks.fa"
+./offset_gffs.py "Danio_rerio_hiqual_finz.gff" "Danio_rerio_hiqual_finz.gff"
+
+/usr/local/Augustus/scripts/getAnnoFasta.pl \
+    "Danio_rerio_hiqual_finz.gff" \
+    --seqfile="/Users/jonwells/Genomes/Cypriniformes/GCF_000002035.6_GRCz11_genomic.nonalt.fna"
 
 hmmsearch --tblout tmp.out \
-    -E 1e-04 \
-    ../../data/phmms/finz_seed.hmm \
-    danio_rerio_hiqual_augustus_finz.aa
+    -E 1e-02 \
+    "../../data/phmms/finz_seed.hmm" \
+    "Danio_rerio_hiqual_finz.aa"
 rg -v '^#' tmp.out | awk '{ print $1 }' | sort | uniq > finz.names
 
 hmmsearch --tblout tmp.out \
-    -E 1e-04 \
-    ../../data/phmms/PF00096_seed.hmm \
-    danio_rerio_hiqual_augustus_finz.aa
+    -E 1e-02 \
+    "../../data/phmms/PF00096_seed.hmm" \
+    "Danio_rerio_hiqual_finz.aa"
 
 rg -v '^#' tmp.out | awk '{ print $1 }' | sort | uniq > c2h2.names
 
 cat finz.names c2h2.names | sort | uniq -d > finz_znf.names
-seqtk subseq danio_rerio_hiqual_augustus_finz.aa finz_znf.names > ../../data/seqs/danio_rerio_hiqual_finz.fa
+seqtk subseq "Danio_rerio_hiqual_finz.aa" finz_znf.names > ../../data/seqs/Danio_rerio_hiqual_finz.fa
+sed 's/.t1/(.t1|$)/' finz_znf.names > tmp; mv tmp finz_znf.names
+rg -f finz_znf.names Danio_rerio_hiqual_finz.gff > ../../data/gffs/Danio_rerio_hiqual_finz.gff
+rm c2h2.names finz.names

@@ -43,6 +43,33 @@ def offset_gff2(filename, flank=0, prefix=None):
             data.append('\t'.join(line))
     return data
 
+def offset_gff3(filename, blockfilename):
+    data = []
+    blocks = set()
+    with open(blockfilename) as blockfile:
+        for blockline in blockfile:
+            blockline = blockline.strip().split('\t')
+            blockstart, blockend = int(blockline[1]), int(blockline[2])
+            blockchrom = f'{blockline[0]}:{blockstart}-{blockend}'
+            blocks.add((blockchrom, blockstart, blockend))
+    with open(filename) as infile:
+        for line in infile:
+            if line.startswith('#'):
+                data.append(line.strip())
+                continue
+            line = line.strip().split('\t')
+            for block in blocks:
+                blockchrom, blockstart, blockend = block
+                if (int(line[3]) > blockstart and int(line[3]) < blockend) and (int(line[4]) > blockstart and int(line[4]) < blockend):
+                    print(blockchrom)
+                    line[0] = blockchrom
+                    line[3] = str(int(line[3]) - blockstart)
+                    line[4] = str(int(line[4]) - blockstart)
+                    break
+            data.append('\t'.join(line))
+    return data
+                    
+
 if __name__ == '__main__':
     if len(sys.argv) == 3:
         data = offset_gff(sys.argv[1])    
@@ -52,6 +79,12 @@ if __name__ == '__main__':
     elif len(sys.argv) == 5:
         data = offset_gff2(sys.argv[1], int(sys.argv[3]), sys.argv[4])    
         with open(sys.argv[2], 'w') as outfile:
+            for line in data:
+                outfile.write(f'{line}\n')
+    elif len(sys.argv) == 4:
+        print('fixing_hints')
+        data = offset_gff3(sys.argv[1], sys.argv[2])
+        with open(sys.argv[3], 'w') as outfile:
             for line in data:
                 outfile.write(f'{line}\n')
     else:
