@@ -8,9 +8,9 @@ rg -v '_UTR' subtracted.base.gff3 > tmp; mv tmp subtracted.base.gff3
 gffread -T subtracted.base.gff3 -o subtracted.base.gtf
 gffread -T ../../data/gffs/ensembl_finz_znf.gff | awk '{ OFS="\t" }{ print $2, $3, $4, $5, $6, $7}' > subtracted.txt
 rg -v -f subtracted.txt subtracted.base.gtf > subtracted.gtf
-gffread -T ../../data/gffs/denovo_finz_znf.gff > ../../data/gffs/denovo_finz_znf.gtf 
+gffread -T ../../data/gffs/Danio_rerio_hiqual_finz.gff > ../../data/gffs/Danio_rerio_hiqual_finz.gtf
 
-cat subtracted.gtf ../../data/gffs/denovo_finz_znf.gtf > ../../data/gffs/Danio_rerio.GRCz11.101.curated_finz.gtf
+cat subtracted.gtf ../../data/gffs/Danio_rerio_hiqual_finz.gtf > ../../data/gffs/Danio_rerio.GRCz11.101.curated_finz.gtf
 cat ../../data/gffs/Danio_rerio.GRCz11.101.curated_finz.gtf ../../data/gffs/danRer11.nonalt.tetranscripts.gtf > ../../data/expression/danRer11.nonalt.genes_tes.gtf
 
 sed 's/transcript://g' ../../data/gffs/Danio_rerio.GRCz11.101.curated_finz.gtf | sed 's/gene://g' > tmp

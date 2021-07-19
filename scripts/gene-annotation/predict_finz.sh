@@ -7,6 +7,7 @@
 genomedir='/Users/jonwells/Genomes/Cypriniformes/'
 
 declare -A genomes
+# genomes[Danio_rerio]=GCF_000002035.6_GRCz11_genomic.nonalt.fna
 
 while read line; do
     key=`awk '{ print $1 }' <<< $line`
@@ -17,6 +18,7 @@ done < ../../data/species_genomes.txt
 for species in ${!genomes[@]}; do
     genomefile=${genomes[$species]}
     echo $species
+
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # 1. Extract genome contig/scaffold/chromosome lengths
@@ -97,9 +99,9 @@ for species in ${!genomes[@]}; do
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     
     # Run augustus - see config files for more detailed params
-    /usr/local/Cellar/augustus/3.3.3_1/bin/augustus \
+    /usr/local/Cellar/augustus/3.3.3_2/bin/augustus \
         --genemodel=complete \
-        --optCfgFile=/usr/local/Cellar/augustus/3.3.3_1/config/ppx.cfg \
+        --optCfgFile=/usr/local/Cellar/augustus/3.3.3_2/config/ppx.cfg \
         --proteinprofile=../../data/phmms/cypriniformes_finz_znf.prfl \
         --species=zebrafish \
         --minexonintronprob=0.2 \
@@ -114,7 +116,7 @@ for species in ${!genomes[@]}; do
         "../../data/gffs/${species}_augustus_finz.gff"
 
     # Extract all protein sequences
-    /usr/local/Cellar/augustus/3.3.3_1/scripts/getAnnoFasta.pl \
+    /usr/local/Cellar/augustus/3.3.3_2/scripts/getAnnoFasta.pl \
         "../../data/gffs/${species}_augustus_finz.gff" \
         --seqfile="${genomedir}/${genomefile}"
     
