@@ -28,6 +28,7 @@ def revert_to_long(newickfile, outnewickfile):
     labeldict = {}
     for record in SeqIO.parse('../../data/seqs/cypriniformes_augustus_finz.fa', 'fasta'):
         njtree_label = relabel(record.id) + ':'
+        print(record.id, njtree_label)
         newlabel = f'{record.id}_[len={len(record.seq)}]:'
         labeldict[njtree_label] = newlabel
 

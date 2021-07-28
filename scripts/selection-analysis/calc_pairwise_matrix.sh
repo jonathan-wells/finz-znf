@@ -8,24 +8,27 @@ rm -r $seqdump
 mkdir $seqdump
 
 # Restrict alignments to those between species with high-quality genomes.
+awk '{ print $1 }' ../../data/species_genomes.txt > ../../data/hiqual_species.txt
 rg -f ../../data/hiqual_species.txt "${seqdir}/cypriniformes_augustus_finz.fa" |
     cut -c 2- > hiqual.names
 seqtk subseq "${seqdir}/cypriniformes_augustus_finz.fa" hiqual.names > tmp.fa
 fastaexplode -f tmp.fa -d $seqdump
  
 i=0
+N=12
 for file in $(ls $seqdump); do
     if echo $file | grep -vqe '.*\.fa' ; then
         continue
     fi
+    ((i++)) 
     echo $i
+    ((j=j%N)); ((j++==0)) && wait
     needle -asequence "${seqdump}/${file}" \
         -bsequence tmp.fa \
         -gapopen 12.0 \
         -gapextend 0.1 \
-        -outfile "${seqdump}/needle_${i}.out"
+        -outfile "${seqdump}/needle_${i}.out" &
         
-    ((i=i+1))
 done
 
 for file in ${seqdump}/needle*; do
