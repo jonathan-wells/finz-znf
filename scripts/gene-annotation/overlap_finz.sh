@@ -35,10 +35,10 @@ for i in ${!annotations[@]}; do
 done
 ./rename_ensembl_chroms.py ../../data/gffs/ensembl_finz_znf.gff ../../data/gffs/ensembl_finz_znf.gff
 
-rg Danio_rerio ../../data/seqs/cypriniformes_augustus_finz.fa |
-    cut -c 14- > denovo_finz_znf.names
-./extract_gene_names.py denovo > "../../data/gffs/denovo_finz_znf.gff"
-rm *.names tmp.out
+# rg Danio_rerio ../../data/seqs/cypriniformes_augustus_finz.fa |
+#     cut -c 14- > Danio_rerio_hiqual_finz.names
+# ./extract_gene_names.py denovo > "../../data/gffs/Danio_rerio_hiqual_finz.gff"
+# rm *.names tmp.out
 
 # Then calculate overlap
 echo calculating overlap
@@ -46,8 +46,8 @@ rg "\tmRNA\t" ../../data/gffs/refseq_finz_znf.gff \
     | gff2bed > ../../data/beds/refseq_finz_znf.transcripts.bed
 rg "\tmRNA\t" ../../data/gffs/ensembl_finz_znf.gff \
     | gff2bed > ../../data/beds/ensembl_finz_znf.transcripts.bed
-rg "\ttranscript\t" ../../data/gffs/denovo_finz_znf.gff \
-    | gff2bed > ../../data/beds/denovo_finz_znf.transcripts.bed
+rg "\ttranscript\t" ../../data/gffs/Danio_rerio_hiqual_finz.gff \
+    | gff2bed > ../../data/beds/Danio_rerio_hiqual_finz.transcripts.bed
 
 bedtools intersect \
     -a ../../data/beds/Ensembl_finz_znf.transcripts.bed \
@@ -60,7 +60,7 @@ bedtools intersect \
     > ensembl_refseq.bed
 
 bedtools intersect \
-    -a ../../data/beds/denovo_finz_znf.transcripts.bed \
+    -a ../../data/beds/Danio_rerio_hiqual_finz.transcripts.bed \
     -b ../../data/beds/RefSeq_finz_znf.transcripts.bed \
     -wa \
     -wb \
@@ -70,7 +70,7 @@ bedtools intersect \
     > denovo_refseq.bed
 
 bedtools intersect \
-    -a ../../data/beds/denovo_finz_znf.transcripts.bed \
+    -a ../../data/beds/Danio_rerio_hiqual_finz.transcripts.bed \
     -b ../../data/beds/Ensembl_finz_znf.transcripts.bed \
     -wa \
     -wb \
@@ -80,7 +80,7 @@ bedtools intersect \
     > denovo_ensembl.bed
 
 bedtools intersect \
-    -a ../../data/beds/denovo_finz_znf.transcripts.bed \
+    -a ../../data/beds/Danio_rerio_hiqual_finz.transcripts.bed \
     -b ensembl_refseq.bed \
     -wa \
     -wb \

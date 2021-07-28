@@ -6,7 +6,7 @@ refseq = set()
 ensembl = set()
 denovo = 0
 
-with open('../../data/gffs/denovo_finz_znf.gff') as infile:
+with open('../../data/gffs/Danio_rerio_hiqual_finz.gff') as infile:
     for line in infile:
         if line.startswith('#'):
             continue
